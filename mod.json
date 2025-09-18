@@ -1,0 +1,16 @@
+{
+  "id": "yourname.megahack_overlay",
+  "name": "MegaHack Overlay",
+  "version": "0.1.0",
+  "author": "yourname",
+  "description": "Overlay + UI for megahack-like features (template)",
+  "license": "MIT",
+  "platforms": ["android64"],
+  "settings": {
+    "enable_overlay": {
+      "type": "bool",
+      "default": true,
+      "label": "Enable overlay"
+    }
+  }
+}
