@@ -15,35 +15,29 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y curl git unzip
 
-      - name: Check and Install Geode CLI (multiple methods)
+      - name: Clone Geode CLI
         run: |
-          INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/geode-sdk/cli/main/install.sh"
-          echo "Trying install script: ${INSTALL_SCRIPT_URL}"
-          HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "${INSTALL_SCRIPT_URL}")
-          echo "HTTP status: ${HTTP_STATUS}"
-          if [ "${HTTP_STATUS}" -eq 200 ]; then
-            curl -sSL "${INSTALL_SCRIPT_URL}" | bash
-            echo "$HOME/.local/bin" >> $GITHUB_PATH
+          git clone https://github.com/geode-sdk/cli.git
+          # You may need to checkout a specific branch/tags if 'main' doesn't have code
+          cd cli
+          # Check if there is any install or build script
+          if [ -f install.sh ]; then
+            bash install.sh
+          elif [ -f bootstrap.sh ]; then
+            bash bootstrap.sh
           else
-            echo "Install script not found. Trying fallback method..."
-            # Fallback: try cloning CLI repo and build from source
-            git clone https://github.com/geode-sdk/cli.git
-            cd cli
-            # Suppose there's a build or install procedure (hypothetical)
-            if [ -f ./install.sh ]; then
-              bash install.sh
-              echo "$HOME/.local/bin" >> $GITHUB_PATH
-              cd ..
-            else
-              echo "Fallback also failed: no install.sh in cloned CLI repo"
-              exit 1
-            fi
+            echo "No install script found in cloned CLI repo. Listing files:"
+            ls -R .
+            exit 1
           fi
+          # Make sure CLI is in PATH
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+          cd ..
 
-      - name: Build
+      - name: Build the mod
         run: geode build -p android64 --release
 
-      - name: Upload
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: MegaHackOverlay
