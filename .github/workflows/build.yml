@@ -9,13 +9,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Install Python & Geode CLI
+
+      # Install Geode CLI using the official bootstrap script
+      - name: Install Geode CLI
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-pip cmake ninja-build
-          pip3 install geode-sdk
+          curl -sSL https://raw.githubusercontent.com/geode-sdk/cli/main/install.sh | bash
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Build
         run: geode build -p android64 --release
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
