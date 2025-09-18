@@ -1,6 +1,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/MenuLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
+#include <Geode/Bindings.hpp>
 #include <Geode/ui/SettingsPopup.hpp>
 #include <Geode/utils/cocos.hpp>
 
