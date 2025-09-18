@@ -10,21 +10,35 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Check and Install Geode CLI
+      - name: Setup dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl git unzip
+
+      - name: Check and Install Geode CLI (multiple methods)
         run: |
           INSTALL_SCRIPT_URL="https://raw.githubusercontent.com/geode-sdk/cli/main/install.sh"
-          echo "Checking ${INSTALL_SCRIPT_URL}"
-          # try to fetch headers
+          echo "Trying install script: ${INSTALL_SCRIPT_URL}"
           HTTP_STATUS=$(curl -o /dev/null -s -w "%{http_code}" "${INSTALL_SCRIPT_URL}")
           echo "HTTP status: ${HTTP_STATUS}"
-          if [ "${HTTP_STATUS}" -ne 200 ]; then
-            echo "Could not fetch install script: HTTP ${HTTP_STATUS}"
-            exit 1
+          if [ "${HTTP_STATUS}" -eq 200 ]; then
+            curl -sSL "${INSTALL_SCRIPT_URL}" | bash
+            echo "$HOME/.local/bin" >> $GITHUB_PATH
+          else
+            echo "Install script not found. Trying fallback method..."
+            # Fallback: try cloning CLI repo and build from source
+            git clone https://github.com/geode-sdk/cli.git
+            cd cli
+            # Suppose there's a build or install procedure (hypothetical)
+            if [ -f ./install.sh ]; then
+              bash install.sh
+              echo "$HOME/.local/bin" >> $GITHUB_PATH
+              cd ..
+            else
+              echo "Fallback also failed: no install.sh in cloned CLI repo"
+              exit 1
+            fi
           fi
-          # script seems to exist, download and run
-          curl -sSL "${INSTALL_SCRIPT_URL}" | bash
-          # ensure PATH includes user's local bin
-          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Build
         run: geode build -p android64 --release
